@@ -61,6 +61,7 @@ function selectMode()   {
                 }
                 if(i === 253)   {
                     signale.success("Finished");
+                    selectMode();
                 }
             }
     
