@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=NetScanner
+Comment=Scan you network
+Exec=gnome-terminal -e "bash -c 'cd /home/morris/git/NetScanner; npm install;node app.js;$SHELL'"
+Icon=/home/morris/git/NetScanner/images/image.png
+Terminal=true
+Type=Application
+Categories=Application;
+Name[it_IT]=NetScanner
