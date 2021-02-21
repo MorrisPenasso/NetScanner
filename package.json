@@ -1,0 +1,26 @@
+{
+  "name": "netscanner",
+  "version": "1.0.0",
+  "description": "Network Scanner",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MorrisPenasso/NetScanner.git"
+  },
+  "author": "Morris Penasso",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MorrisPenasso/NetScanner/issues"
+  },
+  "homepage": "https://github.com/MorrisPenasso/NetScanner#readme",
+  "dependencies": {
+    "asciify-image": "^0.1.6",
+    "evilscan": "^1.7.9",
+    "inquirer": "^7.3.3",
+    "ping": "^0.4.0",
+    "signale": "^1.4.0"
+  }
+}
