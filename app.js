@@ -26,6 +26,9 @@ function showLogo() {
     })
 }
 
+/**
+ * Select mode : scanListIp - scanPort
+ */
 function selectMode()   {
     inquirer.prompt([
         {
@@ -52,13 +55,20 @@ function selectMode()   {
 
             signale.pending("Scanning...");
 
+            //scan ip address range: 192.168.1.1 - 192.168.1.253
             for (let i = 0; i <= 253; i++) {
+
+                //await that ping finished
                 let res = await ping.promise.probe("192.168.1." + i, {
-                    timeout: 0.1
+                    timeout: 0.1 // timeout for ping
                 });
+
+                //if ip address is alive
                 if(res.alive)   {
                     signale.info(res.host);
                 }
+
+                //when finish to ping all ip address
                 if(i === 253)   {
                     signale.success("Finished");
                     selectMode();
@@ -71,6 +81,10 @@ function selectMode()   {
     })
 }
 
+
+/**
+ * questions for scan ports
+ */
 function askForScanPorts() {
     inquirer.prompt([
         {
@@ -96,13 +110,18 @@ function askForScanPorts() {
         }
     ]).then((answers) => { // answer contain link property ( name property of question )
 
-
+        // scan
         scan(answers.target, answers.range, answers.status);
         signale.pending("Scanning...");
 
     })
 }
-
+/**
+ * Scan ports
+ * @param {*} target -> ip address or range
+ * @param {*} range -> range of ports
+ * @param {*} status -> status of ports
+ */
 function scan(target, range, status) {
     
     var options = {
@@ -112,8 +131,10 @@ function scan(target, range, status) {
         banner:true
     };
     
+    //create scanner object
     var scanner = new evilScan(options);
     
+    //when port is scanned
     scanner.on('result',function(data) {
         // fired when item is matching options
         signale.info("Ip address: " + data.ip);
@@ -138,6 +159,7 @@ function scan(target, range, status) {
         signale.success("Finished!")
         selectMode();
     });
-    
+        
+    //scan
     scanner.run();
 }
