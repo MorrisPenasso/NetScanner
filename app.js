@@ -44,6 +44,10 @@ function selectMode()   {
                 {
                     name: "Scan ports",
                     value: "scanPort",
+                },
+                {
+                    name: "SSH connection",
+                    value: "ssh",
                 }
             ]
         }
@@ -74,8 +78,64 @@ function selectMode()   {
                     selectMode();
                 }
             }
-    
-            
+
+        } else if (answer.mode === "ssh") {
+
+            inquirer.prompt([
+                {
+                    // parameters
+                    type: "input", // type
+                    name: "infoDevice",
+                    message: "Write Ip Address, username and password. Example: 192.168.1.10_username123_password123"
+                }
+            ]).then(async (answer) => {
+
+                if (answer.infoDevice !== "") {
+
+                    const info = answer.infoDevice.split("_")
+
+                    var Client = require('ssh2').Client;
+
+                    var conn = new Client();
+                    conn.on('ready', function () {
+
+                        console.log('Client :: ready');
+
+                        conn.shell(function (err, stream) {
+                            if (err) throw err;
+
+                            stream.on('close', function () {
+                                console.log('Stream :: close');
+                                conn.end();
+
+                            }).on('data', function (data) {
+                                console.log('OUTPUT: ' + data);
+                            });
+
+                            askCommand(function repeat(command) {
+                                console.log(command)
+                                //stream.end('ls -l\nexit\n');
+                                stream.end(command + "\n");
+                                
+                                //TODO - Multiples commands
+                                /**if(command !== "exit")  {
+                                    askCommand(repeat)
+                                } else  {
+                                    stream.end('exit\n');
+                                }
+                                */
+                            });
+                        });
+                    })
+                        .connect({
+                            host: info[0],
+                            port: 22,
+                            username: info[1],
+                            password: info[2]
+                        });
+
+                }
+            })
         }
 
     })
@@ -162,4 +222,19 @@ function scan(target, range, status) {
         
     //scan
     scanner.run();
+}
+
+function askCommand(callback) {
+    inquirer.prompt([
+        {
+            // parameters
+            type: "input", // type
+            name: "command",
+            message: "What the command that would you like to launch? Write 'exit' for exit",
+            default: "ls -l"
+        }
+    ]).then(async (answer) => {
+
+        callback(answer.command);
+    })
 }
