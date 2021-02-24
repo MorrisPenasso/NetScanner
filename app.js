@@ -113,7 +113,6 @@ function selectMode()   {
                             });
 
                             askCommand(function repeat(command) {
-                                console.log(command)
                                 //stream.end('ls -l\nexit\n');
                                 stream.end(command + "\n");
                                 
