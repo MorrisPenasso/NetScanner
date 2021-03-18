@@ -3,6 +3,8 @@ const signale = require("signale");
 const evilScan = require("evilscan");
 const asciify = require("asciify-image");
 var ping = require('ping');
+const publicIp = require("public-ip");
+const os = require('os');
 
 showLogo();
 
@@ -48,6 +50,10 @@ function selectMode()   {
                 {
                     name: "SSH connection",
                     value: "ssh",
+                },
+                {
+                    name: "Local informations",
+                    value: "localInfo"
                 }
             ]
         }
@@ -135,6 +141,18 @@ function selectMode()   {
 
                 }
             })
+        } else if(answer.mode == "localInfo")   {
+
+            //Get my public ip address
+            const publicIpAdress = await publicIp.v4();
+            signale.info("Public Ip: " + publicIpAdress);
+
+            //Get local ip
+            const localIpAddress = getLocalIp();
+            signale.info("Local Ip: " + localIpAddress);
+
+            selectMode();
+
         }
 
     })
@@ -223,6 +241,10 @@ function scan(target, range, status) {
     scanner.run();
 }
 
+/**
+ * Ask next command
+ * @param callback 
+ */
 function askCommand(callback) {
     inquirer.prompt([
         {
@@ -236,4 +258,18 @@ function askCommand(callback) {
 
         callback(answer.command);
     })
+}
+
+/**
+ * Get local ip address
+ */
+ function getLocalIp() {
+
+    var localAddress,
+        ifaces = os.networkInterfaces();
+    for (var dev in ifaces) {
+        ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === false ? localAddress = details.address : undefined);
+    }
+    return localAddress;
+
 }
