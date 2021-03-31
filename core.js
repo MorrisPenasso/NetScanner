@@ -2,8 +2,8 @@ const inquirer = require("inquirer");
 const signale = require("signale");
 const evilScan = require("evilscan");
 var ping = require('ping');
-const publicIp = require("public-ip");
-const os = require('os');
+var network = require('network');
+const open = require('open');
 
 /**
  * Select mode : scanListIp - scanPort
@@ -31,6 +31,10 @@ function selectMode() {
                 {
                     name: "Local informations",
                     value: "localInfo"
+                },
+                {
+                    name: "Open Gateway Panel Control",
+                    value: "gatewayPnlCtrl"
                 }
             ]
         }
@@ -51,6 +55,9 @@ function selectMode() {
         } else if (answer.mode == "localInfo") {
 
             await localInfo();
+        } else if(answer.mode == "gatewayPnlCtrl")  {
+
+            await openGatewayPanelControl();
         }
 
     })
@@ -83,7 +90,6 @@ async function scanListIp(isTest) {
             } else {
                 resForTest.push(res.host);
             }
-
         }
 
         //when finish to ping all ip address
@@ -95,7 +101,6 @@ async function scanListIp(isTest) {
                 return resForTest;
             }
         }
-
     }
 }
 /**
@@ -162,22 +167,59 @@ function sshCommand()   {
 /**
  * Get local info
  */
-async function localInfo()    {
+async function localInfo() {
 
     signale.pending("Loading...")
 
     //Get my public ip address
-    const publicIpAdress = await publicIp.v4();
-    signale.info("Public Ip: " + publicIpAdress);
+    network.get_public_ip(function (err, publicIpAddress) {
 
-    //Get local ip
-    const localIpAddress = getLocalIp();
-    signale.info("Local Ip: " + localIpAddress);
+        if (err) {
+            console.log(err);
+            return;
+        }
 
-    selectMode();
+        signale.info("Public Ip: " + publicIpAddress);
 
+        //Get local ip
+        network.get_private_ip(function (err, localIpAddress) {
+
+            if (err) {
+                console.log(err);
+                return;
+            }
+
+            signale.info("Local Ip: " + localIpAddress);
+
+            network.get_gateway_ip(function (err, gatewayIp) {
+
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                signale.info("Gateway: " + gatewayIp + "\n -----------");
+
+                network.get_active_interface(function (err, obj) {
+
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    signale.success("Active interface:")
+                    signale.info("Name: " + obj.name);
+                    signale.info("Ip address: " + obj.ip_address);
+                    signale.info("Mac address: " + obj.mac_address);
+                    signale.info("Gateway: " + obj.gateway_ip);
+                    signale.info("Netmask: " + obj.netmask);
+                    signale.info("Type: " + obj.type);
+                    selectMode();
+
+                });
+            })
+
+        })
+    })
 }
-
 
 /**
  * questions for scan ports
@@ -289,18 +331,20 @@ function askCommand(callback) {
     })
 }
 
-/**
- * Get local ip address
- */
-function getLocalIp() {
+async function openGatewayPanelControl()  {
 
-    var localAddress,
-        ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-        ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === false ? localAddress = details.address : undefined);
-    }
-    return localAddress;
+    signale.success("Loading...");
 
+    network.get_gateway_ip(async function (err, gatewayIp) {
+
+        if (err) {
+            console.log(err);
+            return;
+        }
+        await open("http://" + gatewayIp);
+
+        selectMode();
+    })
 }
 
 module.exports = {
@@ -310,6 +354,5 @@ module.exports = {
     sshCommand, sshCommand,
     localInfo: localInfo,
     scan: scan,
-    askCommand: askCommand,
-    getLocalIp: getLocalIp
+    askCommand: askCommand
 }
