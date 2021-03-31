@@ -164,6 +164,8 @@ function sshCommand()   {
  */
 async function localInfo()    {
 
+    signale.pending("Loading...")
+
     //Get my public ip address
     const publicIpAdress = await publicIp.v4();
     signale.info("Public Ip: " + publicIpAdress);
