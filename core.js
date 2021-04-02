@@ -5,6 +5,7 @@ const ping = require('ping');
 const network = require('network');
 const open = require('open');
 const fs = require("fs");
+const dns = require('dns');
 
 /**
  * Select mode : scanListIp - scanPort
@@ -42,24 +43,29 @@ function selectMode() {
         }
     ]).then(async (answer) => { // answer contain link property ( name property of question )
 
-        if (answer.mode === "scanPort") {
+        const isOnline = await checkIsOnline();
 
-            askForScanPorts();
+        if (isOnline) {
+            if (answer.mode === "scanPort") {
 
-        } else if (answer.mode === "scanListIp") {
+                askForScanPorts(); // with error controller
 
-           await scanListIp(null);
+            } else if (answer.mode === "scanListIp") {
 
-        } else if (answer.mode === "ssh") {
+               await scanListIp();
 
-            sshCommand();
+            } else if (answer.mode === "ssh") {
 
-        } else if (answer.mode == "localInfo") {
+                sshCommand(); // with error controller
 
-            await localInfo();
-        } else if(answer.mode == "gatewayPnlCtrl")  {
+            } else if (answer.mode == "localInfo") {
 
-            await openGatewayPanelControl();
+                localInfo(); // with error controller
+
+            } else if (answer.mode == "gatewayPnlCtrl") {
+
+                openGatewayPanelControl(); // with error controller
+            }
         }
 
     })
@@ -67,48 +73,40 @@ function selectMode() {
 
 /**
  * Execute scan of ports
- * @param isTest -> if this function is executed from test
  */
-async function scanListIp(isTest) {
-
-    let resForTest = [];
-
-    if (!isTest) {
+function scanListIp() {
+    return new Promise(async (resolve, reject) => {
         signale.pending("Scanning...");
-    }
-    //scan ip address range: 192.168.1.1 - 192.168.1.253
-    for (let i = 0; i <= 253; i++) {
 
+        //scan ip address range: 192.168.1.1 - 192.168.1.253
+        for (let i = 0; i <= 253; i++) {
 
-        //await that ping finished
-        let res = await ping.promise.probe("192.168.1." + i, {
-            timeout: 0.1 // timeout for ping
-        });
+            //await that ping finished
+            let res = await ping.promise.probe("192.168.1." + i, {
+                timeout: 0.1 // timeout for ping
+            });
 
-        //if ip address is alive
-        if (res.alive) {
-            if (!isTest) {
+            //if ip address is alive
+            if (res.alive) {
+
                 signale.info(res.host);
-            } else {
-                resForTest.push(res.host);
-            }
-        }
 
-        //when finish to ping all ip address
-        if (i === 253) {
-            if (!isTest) {
+            }
+
+            //when finish to ping all ip address
+            if (i === 253) {
                 signale.success("Finished");
                 selectMode();
-            } else {
-                return resForTest;
+
             }
         }
-    }
+    })
+
 }
 /**
  * Execute ssh command
  */
-function sshCommand()   {
+function sshCommand() {
 
     inquirer.prompt([
         {
@@ -173,7 +171,7 @@ function sshCommand()   {
 /**
  * Get local info
  */
-async function localInfo() {
+function localInfo() {
 
     signale.pending("Loading...")
 
@@ -272,7 +270,7 @@ function askForScanPorts() {
  * @param {*} range -> range of ports
  * @param {*} status -> status of ports
  */
-async function scan(target, range, status, isTest) {
+async function scan(target, range, status) {
 
     var options = {
         target: target,
@@ -287,35 +285,33 @@ async function scan(target, range, status, isTest) {
     //when port is scanned
     scanner.on('result', function (data) {
 
-        if (!isTest) {
-            // fired when item is matching options
-            signale.info("Ip address: " + data.ip);
-            signale.info("Port: " + data.port);
-            if (data.banner !== "") {
-                signale.info("Banner: " + data.banner);
-            } else {
-                signale.info("Banner: /");
+        // fired when item is matching options
+        signale.info("Ip address: " + data.ip);
+        signale.info("Port: " + data.port);
+        if (data.banner !== "") {
+            signale.info("Banner: " + data.banner);
+        } else {
+            signale.info("Banner: /");
 
-            }
-            signale.info("Status: " + data.status);
-            console.log("--------------------");
         }
+        signale.info("Status: " + data.status);
+        console.log("--------------------");
+
 
     });
 
     scanner.on('error', function (err) {
-        throw new Error(data.toString());
+        signale.error("Error: see log file");
+        writeLogErrorFile(err);
+        return;
     });
 
     scanner.on('done', function () {
 
-        if (!isTest) {
-            // finished !
-            signale.success("Finished!")
-            selectMode();
-        } else {
-            return data;
-        }
+        // finished !
+        signale.success("Finished!")
+        selectMode();
+
     });
 
     //scan
@@ -341,7 +337,7 @@ function askCommand(callback) {
     })
 }
 
-async function openGatewayPanelControl()  {
+function openGatewayPanelControl() {
 
     signale.success("Loading...");
 
@@ -358,7 +354,7 @@ async function openGatewayPanelControl()  {
     })
 }
 
-function writeLogErrorFile(err)    {
+function writeLogErrorFile(err) {
 
     var todayTime = new Date();
     var month = todayTime.getMonth();
@@ -368,7 +364,25 @@ function writeLogErrorFile(err)    {
     var min = todayTime.getMinutes();
     const error = month + "/" + day + "/" + year + "-" + hour + ":" + min + "\n" + err.stack + "\n\n";
 
-    fs.appendFile("logs/logsErrors.txt", error, function()  {})
+    fs.appendFile("logs/logsErrors.log", error, function () { })
+}
+
+function checkIsOnline() {
+    return new Promise((resolve, reject) => {
+        dns.resolve('www.google.com', function (err) {
+            if (err) {
+                writeLogErrorFile(err);
+                signale.error("Error: see log file");
+                return resolve(false);
+            } else {
+                return resolve(true);
+            }
+        }, function (err) {
+            writeLogErrorFile(err);
+            signale.error("Error: see log file");
+            return resolve(false);
+        });
+    })
 }
 
 module.exports = {
