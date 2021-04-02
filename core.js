@@ -1,20 +1,22 @@
 const inquirer = require("inquirer");
 const signale = require("signale");
 const evilScan = require("evilscan");
-var ping = require('ping');
-var network = require('network');
+const ping = require('ping');
+const network = require('network');
 const open = require('open');
+const fs = require("fs");
 
 /**
  * Select mode : scanListIp - scanPort
  */
 function selectMode() {
+
     inquirer.prompt([
         {
             // parameters
             type: "list", // type
             name: "mode",
-            message: "What do you do?",
+            message: "What do you do? Ctrl+c to exit",
             choices: [
                 {
                     name: "Get list of active ip address",
@@ -129,7 +131,11 @@ function sshCommand()   {
                 console.log('Client :: ready');
 
                 conn.shell(function (err, stream) {
-                    if (err) throw err;
+                    if (err) {
+                        signale.error("Error: see log file");
+                        writeLogErrorFile(err);
+                        return;
+                    }
 
                     stream.on('close', function () {
                         console.log('Stream :: close');
@@ -175,7 +181,8 @@ async function localInfo() {
     network.get_public_ip(function (err, publicIpAddress) {
 
         if (err) {
-            console.log(err);
+            signale.error("Error: see log file");
+            writeLogErrorFile(err);
             return;
         }
 
@@ -185,7 +192,8 @@ async function localInfo() {
         network.get_private_ip(function (err, localIpAddress) {
 
             if (err) {
-                console.log(err);
+                signale.error("Error: see log file");
+                writeLogErrorFile(err);
                 return;
             }
 
@@ -194,7 +202,8 @@ async function localInfo() {
             network.get_gateway_ip(function (err, gatewayIp) {
 
                 if (err) {
-                    console.log(err);
+                    signale.error("Error: see log file");
+                    writeLogErrorFile(err);
                     return;
                 }
                 signale.info("Gateway: " + gatewayIp + "\n -----------");
@@ -202,7 +211,8 @@ async function localInfo() {
                 network.get_active_interface(function (err, obj) {
 
                     if (err) {
-                        console.log(err);
+                        signale.error("Error: see log file");
+                        writeLogErrorFile(err);
                         return;
                     }
                     signale.success("Active interface:")
@@ -338,13 +348,27 @@ async function openGatewayPanelControl()  {
     network.get_gateway_ip(async function (err, gatewayIp) {
 
         if (err) {
-            console.log(err);
+            signale.error("Error: see log file");
+            writeLogErrorFile(err);
             return;
         }
         await open("http://" + gatewayIp);
 
         selectMode();
     })
+}
+
+function writeLogErrorFile(err)    {
+
+    var todayTime = new Date();
+    var month = todayTime.getMonth();
+    var day = todayTime.getDate();
+    var year = todayTime.getFullYear();
+    var hour = todayTime.getHours();
+    var min = todayTime.getMinutes();
+    const error = month + "/" + day + "/" + year + "-" + hour + ":" + min + "\n" + err.stack + "\n\n";
+
+    fs.appendFile("logs/logsErrors.txt", error, function()  {})
 }
 
 module.exports = {
