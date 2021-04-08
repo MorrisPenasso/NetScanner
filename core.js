@@ -6,6 +6,7 @@ const network = require('network');
 const open = require('open');
 const fs = require("fs");
 const dns = require('dns');
+const translations = require("./translations");
 
 /**
  * Select mode : scanListIp - scanPort
@@ -17,26 +18,26 @@ function selectMode() {
             // parameters
             type: "list", // type
             name: "mode",
-            message: "What do you do? Ctrl+c to exit",
+            message: translations.getPhrase("WelcomeMessage"),
             choices: [
                 {
-                    name: "Get list of active ip address",
+                    name: translations.getPhrase("scanListIp"),
                     value: "scanListIp",
                 },
                 {
-                    name: "Scan ports",
+                    name: translations.getPhrase("scanPort"),
                     value: "scanPort",
                 },
                 {
-                    name: "SSH connection",
+                    name: translations.getPhrase("ssh"),
                     value: "ssh",
                 },
                 {
-                    name: "Local informations",
+                    name: translations.getPhrase("localInfo"),
                     value: "localInfo"
                 },
                 {
-                    name: "Open Gateway Panel Control",
+                    name: translations.getPhrase("gatewayPnlCtrl"),
                     value: "gatewayPnlCtrl"
                 }
             ]
@@ -76,7 +77,7 @@ function selectMode() {
  */
 function scanListIp() {
     return new Promise(async (resolve, reject) => {
-        signale.pending("Scanning...");
+        signale.pending(translations.getPhrase("scanningMsg"));
 
         //scan ip address range: 192.168.1.1 - 192.168.1.253
         for (let i = 0; i <= 253; i++) {
@@ -95,7 +96,7 @@ function scanListIp() {
 
             //when finish to ping all ip address
             if (i === 253) {
-                signale.success("Finished");
+                signale.success(translations.getPhrase("finishMsg"));
                 selectMode();
 
             }
@@ -113,7 +114,7 @@ function sshCommand() {
             // parameters
             type: "input", // type
             name: "infoDevice",
-            message: "Write Ip Address, username and password. Example: 192.168.1.10_username123_password123"
+            message: translations.getPhrase("infoDevice")
         }
     ]).then(async (answer) => {
 
@@ -130,7 +131,7 @@ function sshCommand() {
 
                 conn.shell(function (err, stream) {
                     if (err) {
-                        signale.error("Error: see log file");
+                        signale.error(translations.getPhrase("errorMsg"));
                         writeLogErrorFile(err);
                         return;
                     }
@@ -173,34 +174,34 @@ function sshCommand() {
  */
 function localInfo() {
 
-    signale.pending("Loading...")
+    signale.pending(translations.getPhrase("loadingMsg"))
 
     //Get my public ip address
     network.get_public_ip(function (err, publicIpAddress) {
 
         if (err) {
-            signale.error("Error: see log file");
+            signale.error(translations.getPhrase("errorMsg"));
             writeLogErrorFile(err);
             return;
         }
 
-        signale.info("Public Ip: " + publicIpAddress);
+        signale.info(translations.getPhrase("publicIp") + publicIpAddress);
 
         //Get local ip
         network.get_private_ip(function (err, localIpAddress) {
 
             if (err) {
-                signale.error("Error: see log file");
+                signale.error(translations.getPhrase("errorMsg"));
                 writeLogErrorFile(err);
                 return;
             }
 
-            signale.info("Local Ip: " + localIpAddress);
+            signale.info(translations.getPhrase("localIp") + localIpAddress);
 
             network.get_gateway_ip(function (err, gatewayIp) {
 
                 if (err) {
-                    signale.error("Error: see log file");
+                    signale.error(translations.getPhrase("errorMsg"));
                     writeLogErrorFile(err);
                     return;
                 }
@@ -209,17 +210,17 @@ function localInfo() {
                 network.get_active_interface(function (err, obj) {
 
                     if (err) {
-                        signale.error("Error: see log file");
+                        signale.error(translations.getPhrase("errorMsg"));
                         writeLogErrorFile(err);
                         return;
                     }
-                    signale.success("Active interface:")
-                    signale.info("Name: " + obj.name);
-                    signale.info("Ip address: " + obj.ip_address);
+                    signale.success(translations.getPhrase("activeInterface"))
+                    signale.info(translations.getPhrase("nameInterface") + obj.name);
+                    signale.info(translations.getPhrase("ipAddress") + obj.ip_address);
                     signale.info("Mac address: " + obj.mac_address);
                     signale.info("Gateway: " + obj.gateway_ip);
                     signale.info("Netmask: " + obj.netmask);
-                    signale.info("Type: " + obj.type);
+                    signale.info(translations.getPhrase("interfaceType") + obj.type);
                     selectMode();
 
                 });
@@ -238,28 +239,28 @@ function askForScanPorts() {
             // parameters
             type: "input", // type
             name: "target",
-            message: "What is the IP address to scan? Ctrl+c to exit", // question
+            message: translations.getPhrase("target"), // question
             default: "127.0.0.1"
         },
         {
             // parameters
             type: "input", // type
             name: "range",
-            message: "What is the range of port? Ctrl+c to exit", // question
+            message: translations.getPhrase("range"), // question
             default: "21-23"
         },
         {
             // parameters
             type: "input", // type
             name: "status",
-            message: "What status would you like to find? Timeout, Refused, Open, Unreachable - Ctrl+c to exit", // question
+            message: translations.getPhrase("status"), // question
             default: "TROU"
         }
     ]).then(async (answers) => { // answer contain link property ( name property of question )
 
         // scan
         await scan(answers.target, answers.range, answers.status, null);
-        signale.pending("Scanning...");
+        signale.pending(translations.getPhrase("loadingMsg"));
 
     })
 }
@@ -286,22 +287,22 @@ async function scan(target, range, status) {
     scanner.on('result', function (data) {
 
         // fired when item is matching options
-        signale.info("Ip address: " + data.ip);
-        signale.info("Port: " + data.port);
+        signale.info(translations.getPhrase("ipAddress") + data.ip);
+        signale.info(translations.getPhrase("port") + data.port);
         if (data.banner !== "") {
             signale.info("Banner: " + data.banner);
         } else {
             signale.info("Banner: /");
 
         }
-        signale.info("Status: " + data.status);
+        signale.info(translations.getPhrase("statusMsg") + data.status);
         console.log("--------------------");
 
 
     });
 
     scanner.on('error', function (err) {
-        signale.error("Error: see log file");
+        signale.error(translations.getPhrase("errorMsg"));
         writeLogErrorFile(err);
         return;
     });
@@ -309,7 +310,7 @@ async function scan(target, range, status) {
     scanner.on('done', function () {
 
         // finished !
-        signale.success("Finished!")
+        signale.success(translations.getPhrase("finishMsg"))
         selectMode();
 
     });
@@ -328,7 +329,7 @@ function askCommand(callback) {
             // parameters
             type: "input", // type
             name: "command",
-            message: "What the command that would you like to launch? Write 'exit' for exit",
+            message: translations.getPhrase("commandSsh"),
             default: "ls -l"
         }
     ]).then(async (answer) => {
@@ -339,12 +340,12 @@ function askCommand(callback) {
 
 function openGatewayPanelControl() {
 
-    signale.success("Loading...");
+    signale.success(translations.getPhrase("loadingMsg"));
 
     network.get_gateway_ip(async function (err, gatewayIp) {
 
         if (err) {
-            signale.error("Error: see log file");
+            signale.error(translations.getPhrase("errorMsg"));
             writeLogErrorFile(err);
             return;
         }
@@ -372,14 +373,14 @@ function checkIsOnline() {
         dns.resolve('www.google.com', function (err) {
             if (err) {
                 writeLogErrorFile(err);
-                signale.error("Error: see log file");
+                signale.error(translations.getPhrase("errorMsg"));
                 return resolve(false);
             } else {
                 return resolve(true);
             }
         }, function (err) {
             writeLogErrorFile(err);
-            signale.error("Error: see log file");
+            signale.error(translations.getPhrase("errorMsg"));
             return resolve(false);
         });
     })
