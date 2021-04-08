@@ -1,6 +1,6 @@
 {
   "name": "netscanner",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Network Scanner",
   "main": "app.js",
   "scripts": {
@@ -21,7 +21,6 @@
     "chalk-animation": "^1.6.0",
     "evilscan": "^1.7.9",
     "inquirer": "^7.3.3",
-    "keypress": "^0.2.1",
     "network": "^0.5.0",
     "open": "^8.0.4",
     "ping": "^0.4.0",
