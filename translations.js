@@ -5,6 +5,16 @@ var listPhrases = [];
 if(x === "it")  {
 
     listPhrases.push(
+        {
+            name: "packageInstalled",
+            msg: "Controllo pacchetti terminato!"
+
+        },
+        {
+            name: "WelcomeMessageWithLogo",
+            msg: "Benvenuto in NetScanner! \nversione: "
+
+        },
 
         //START COMMANDS
         {
@@ -133,6 +143,16 @@ if(x === "it")  {
 } else if(x === "en")   {
 
     listPhrases.push(
+        {
+            name: "packageInstalled",
+            msg: "Packages controls terminated!"
+
+        },
+        {
+            name: "WelcomeMessageWithLogo",
+            msg: "Welcome in NetScanner! \nversion: "
+
+        },
 
         //START COMMANDS
         {

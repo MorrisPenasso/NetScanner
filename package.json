@@ -18,6 +18,7 @@
   "homepage": "https://github.com/MorrisPenasso/NetScanner#readme",
   "dependencies": {
     "asciify-image": "^0.1.6",
+    "chalk-animation": "^1.6.0",
     "evilscan": "^1.7.9",
     "inquirer": "^7.3.3",
     "network": "^0.5.0",
