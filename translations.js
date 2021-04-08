@@ -1,3 +1,5 @@
+const pjson = require('./package.json');
+
 var x = process.env.LANG.substring(0, process.env.LANG.indexOf("_")); // get local language
 
 var listPhrases = [];
@@ -12,7 +14,7 @@ if(x === "it")  {
         },
         {
             name: "WelcomeMessageWithLogo",
-            msg: "Benvenuto in NetScanner! \nversione: "
+            msg: "Benvenuto in NetScanner! Versione: " + pjson.version + "\nPremi Invio per iniziare"
 
         },
 
@@ -150,7 +152,7 @@ if(x === "it")  {
         },
         {
             name: "WelcomeMessageWithLogo",
-            msg: "Welcome in NetScanner! \nversion: "
+            msg: "Welcome in NetScanner! Version: " + pjson.version + "Press Enter to start"
 
         },
 
