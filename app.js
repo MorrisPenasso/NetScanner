@@ -6,6 +6,8 @@ const readline = require('readline');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
+var isStarted = false; // for not duplicate enter keypress event
+
 //Print message for packages
 const msgRainbow2 = chalkAnimation.rainbow(translations.getPhrase("packageInstalled")); // Animation starts
 setTimeout(() => {
@@ -32,10 +34,16 @@ function showLogo() {
         var msg = translations.getPhrase("WelcomeMessageWithLogo");
         const msgRainbow1 = chalkAnimation.rainbow(msg); // Animation starts
 
+        //When press a button
         process.stdin.on('keypress', function (key, data) {
-            if (data.name === "return") {
-                coreFunctions.selectMode();
-                msgRainbow1.stop();
+            if (data.name === "return") { // if press enter button
+
+                if (!isStarted) {
+                    coreFunctions.selectMode();
+                    msgRainbow1.stop();
+                    isStarted = true;
+                }
+                
             }
         });
     })
