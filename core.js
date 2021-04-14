@@ -365,6 +365,10 @@ function writeLogErrorFile(err) {
     var min = todayTime.getMinutes();
     const error = month + "/" + day + "/" + year + "-" + hour + ":" + min + "\n" + err.stack + "\n\n";
 
+    if (!fs.existsSync("logs")){
+        fs.mkdirSync("logs");
+    }
+
     fs.appendFile("logs/logsErrors.log", error, function () { })
 }
 
