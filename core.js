@@ -258,10 +258,37 @@ function askForScanPorts() {
         }
     ]).then(async (answers) => { // answer contain link property ( name property of question )
 
-        // scan
-        await scan(answers.target, answers.range, answers.status, null);
-        signale.pending(translations.getPhrase("loadingMsg"));
+        let error = false;
 
+        //test if answers are valid
+        let validIp = validateIpAddress(answers.target);
+
+        let validRange = validateRange(answers.range);
+
+        let validStatus = validateStatus(answers.status);
+
+        if (!validIp) {
+            signale.error(translations.getPhrase("errorMsg"));
+            writeLogErrorFile({ stack: "You have entered an invalid IP address!" });
+            error = true;
+        } 
+        
+        if (!validRange) {
+            signale.error(translations.getPhrase("errorMsg"));
+            writeLogErrorFile({ stack: "You have entered an invalid range!" });
+            error = true;
+        } 
+        if (!validStatus) {
+            signale.error(translations.getPhrase("errorMsg"));
+            writeLogErrorFile({ stack: "You have entered an invalid status!" });
+            error = true;
+        }
+        
+        if(!error)    {
+            // scan
+            await scan(answers.target, answers.range, answers.status, null);
+            signale.pending(translations.getPhrase("loadingMsg"));
+        }
     })
 }
 
@@ -389,6 +416,45 @@ function checkIsOnline() {
         });
     })
 }
+
+function validateIpAddress(ipAddress) {
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipAddress)) {
+        return (true)
+    }
+    return (false)
+}
+
+function validateRange(range)    {
+    
+    let startRange = range.substring(0, range.indexOf("-"));
+    let endRange = range.substring(range.indexOf("-") + 1, range.length);
+
+    //if contain "-" character
+    if (range.indexOf("-") !== -1) {
+        if (/[0-6]/.test(startRange)) {
+            if (/[0-6]/.test(endRange)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+    } else {
+        return false;
+    }
+}
+
+function validateStatus(status) {
+    
+    if (status.toUpperCase().indexOf("OPEN") != -1 || status.toUpperCase().indexOf("TIMEOUT") != -1 || status.toUpperCase().indexOf("REFUSED") != -1 || status.toUpperCase().indexOf("UNREACHABLE") != -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 module.exports = {
     selectMode: selectMode,
