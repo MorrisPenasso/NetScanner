@@ -117,54 +117,63 @@ function sshCommand() {
             message: translations.getPhrase("infoDevice")
         }
     ]).then(async (answer) => {
+        
+        const info = answer.infoDevice.split("_")
 
-        if (answer.infoDevice !== "") {
+        //test if answers are valid
+        let validIp = validateIpAddress(info[0]);
 
-            const info = answer.infoDevice.split("_")
+        let validFormat = answer.infoDevice.indexOf("_") != -1 && info.length > 0;
+
+        if (answer.infoDevice !== "" && validIp && validFormat) {
 
             var Client = require('ssh2').Client;
 
             var conn = new Client();
             conn.on('ready', function () {
 
-                console.log('Client :: ready');
+                signale.success('Connection established...\n');
 
                 conn.shell(function (err, stream) {
+
+                    //If receive error when start connection
                     if (err) {
                         signale.error(translations.getPhrase("errorMsg"));
                         writeLogErrorFile(err);
                         return;
                     }
 
+                    //when stream is closed
                     stream.on('close', function () {
-                        console.log('Stream :: close');
+                        signale.info('Connection closed\n');
                         conn.end();
 
+                        //when stream receive data
                     }).on('data', function (data) {
-                        console.log('OUTPUT: ' + data);
+                        console.log("" + data);
                     });
 
-                    askCommand(function repeat(command) {
-                        //stream.end('ls -l\nexit\n');
-                        stream.end(command + "\n");
+                    //when is connected, i wait 2 seconds because the client return the response for connection complete
+                    setTimeout(function () {
+                        askCommand(function (command) {
+                            stream.end(command + "\nexit\n");
 
-                        //TODO - Multiples commands
-                        /**if(command !== "exit")  {
-                            askCommand(repeat)
-                        } else  {
-                            stream.end('exit\n');
-                        }
-                        */
-                    });
-                });
-            })
-                .connect({
-                    host: info[0],
-                    port: 22,
-                    username: info[1],
-                    password: info[2]
-                });
-
+                            setTimeout(function () {
+                                selectMode();
+                            }, 500)
+                        })
+                    }, 2000)
+                })
+            }).connect({
+                host: info[0],
+                port: 22,
+                username: info[1],
+                password: info[2]
+            });
+        } else  {
+            signale.error(translations.getPhrase("errorMsg"));
+            writeLogErrorFile({ stack: "SSH Error: You have entered invalid informations" });
+            error = true;
         }
     })
 }
