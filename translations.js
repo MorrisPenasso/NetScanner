@@ -1,10 +1,16 @@
 const pjson = require('./package.json');
 
-var x = process.env.LANG.substring(0, process.env.LANG.indexOf("_")); // get local language
+var lang = "";
+
+if (process.env.LANG) {
+    lang = process.env.LANG.substring(0, process.env.LANG.indexOf("_")); // get local language
+} else {
+    lang = "en";
+}
 
 var listPhrases = [];
 
-if(x === "it")  {
+if (lang === "it") {
 
     listPhrases.push(
         {
@@ -147,7 +153,7 @@ if(x === "it")  {
         }   
            
     )
-} else if(x === "en")   {
+} else if(lang === "en")   {
 
     listPhrases.push(
         {
