@@ -79,6 +79,9 @@ function scanListIp() {
     return new Promise(async (resolve, reject) => {
         signale.pending(translations.getPhrase("scanningMsg"));
 
+        writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
+        writeLog(translations.getPhrase("scanningMsg"));
+
         //scan ip address range: 192.168.1.1 - 192.168.1.253
         for (let i = 0; i <= 253; i++) {
 
@@ -91,12 +94,14 @@ function scanListIp() {
             if (res.alive) {
 
                 signale.info(res.host);
+                writeLog(res.host);
 
             }
 
             //when finish to ping all ip address
             if (i === 253) {
                 signale.success(translations.getPhrase("finishMsg"));
+                writeLog(translations.getPhrase("finishMsg") + "\n")
                 selectMode();
 
             }
@@ -133,6 +138,8 @@ function sshCommand() {
             conn.on('ready', function () {
 
                 signale.success('Connection established...\n');
+                writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
+                writeLog('SSH connection established...\n');
 
                 conn.shell(function (err, stream) {
 
@@ -146,11 +153,13 @@ function sshCommand() {
                     //when stream is closed
                     stream.on('close', function () {
                         signale.info('Connection closed\n');
+                        writeLog("Connection closed\n")
                         conn.end();
 
                         //when stream receive data
                     }).on('data', function (data) {
                         console.log("" + data);
+                        writeLog("" + data)
                     });
 
                     //when is connected, i wait 2 seconds because the client return the response for connection complete
@@ -183,7 +192,10 @@ function sshCommand() {
  */
 function localInfo() {
 
-    signale.pending(translations.getPhrase("loadingMsg"))
+    writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
+
+    signale.pending(translations.getPhrase("loadingMsg"));
+    writeLog(translations.getPhrase("loadingMsg"));
 
     //Get my public ip address
     network.get_public_ip(function (err, publicIpAddress) {
@@ -195,6 +207,7 @@ function localInfo() {
         }
 
         signale.info(translations.getPhrase("publicIp") + publicIpAddress);
+        writeLog(translations.getPhrase("publicIp") + publicIpAddress);
 
         //Get local ip
         network.get_private_ip(function (err, localIpAddress) {
@@ -206,6 +219,7 @@ function localInfo() {
             }
 
             signale.info(translations.getPhrase("localIp") + localIpAddress);
+            writeLog(translations.getPhrase("localIp") + localIpAddress);
 
             network.get_gateway_ip(function (err, gatewayIp) {
 
@@ -215,6 +229,7 @@ function localInfo() {
                     return;
                 }
                 signale.info("Gateway: " + gatewayIp + "\n -----------");
+                writeLog("Gateway: " + gatewayIp + "\n -----------");
 
                 network.get_active_interface(function (err, obj) {
 
@@ -223,6 +238,7 @@ function localInfo() {
                         writeLogErrorFile(err);
                         return;
                     }
+                    
                     signale.success(translations.getPhrase("activeInterface"))
                     signale.info(translations.getPhrase("nameInterface") + obj.name);
                     signale.info(translations.getPhrase("ipAddress") + obj.ip_address);
@@ -230,6 +246,16 @@ function localInfo() {
                     signale.info("Gateway: " + obj.gateway_ip);
                     signale.info("Netmask: " + obj.netmask);
                     signale.info(translations.getPhrase("interfaceType") + obj.type);
+
+                    writeLog(translations.getPhrase("activeInterface"));
+                    writeLog(translations.getPhrase("nameInterface") + obj.name);
+                    writeLog(translations.getPhrase("ipAddress") + obj.ip_address);
+                    writeLog("Mac address: " + obj.mac_address);
+                    writeLog("Gateway: " + obj.gateway_ip);
+                    writeLog("Netmask: " + obj.netmask);
+                    writeLog(translations.getPhrase("interfaceType") + obj.type);
+                    writeLog(translations.getPhrase("finishMsg") + "\n");
+
                     selectMode();
 
                 });
@@ -308,6 +334,8 @@ function askForScanPorts() {
  * @param {*} status -> status of ports
  */
 async function scan(target, range, status) {
+    
+    writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
 
     var options = {
         target: target,
@@ -324,17 +352,24 @@ async function scan(target, range, status) {
 
         // fired when item is matching options
         signale.info(translations.getPhrase("ipAddress") + data.ip);
+        writeLog(translations.getPhrase("ipAddress") + data.ip);
+
         signale.info(translations.getPhrase("port") + data.port);
+        writeLog(translations.getPhrase("port") + data.port);
+
         if (data.banner !== "") {
             signale.info("Banner: " + data.banner);
+            writeLog("Banner: " + data.banner);
         } else {
             signale.info("Banner: /");
+            writeLog("Banner: /");
 
         }
         signale.info(translations.getPhrase("statusMsg") + data.status);
         console.log("--------------------");
 
-
+        writeLog(translations.getPhrase("statusMsg") + data.status);
+        writeLog("--------------------");
     });
 
     scanner.on('error', function (err) {
@@ -347,6 +382,8 @@ async function scan(target, range, status) {
 
         // finished !
         signale.success(translations.getPhrase("finishMsg"))
+        writeLog("\n" + translations.getPhrase("finishMsg") + "\n");
+
         selectMode();
 
     });
@@ -374,6 +411,9 @@ function askCommand(callback) {
     })
 }
 
+/**
+ * Open gateway panel control on you default browser
+ */
 function openGatewayPanelControl() {
 
     signale.success(translations.getPhrase("loadingMsg"));
@@ -391,15 +431,54 @@ function openGatewayPanelControl() {
     })
 }
 
+/**
+ * Get time
+ * @returns time -> "12:30" 
+ */
+function getTime()  {
+
+    const todayTime = new Date();
+
+    const hour = todayTime.getHours();
+    const min = todayTime.getMinutes();
+
+    return hour + ":" + min;
+
+}
+
+/**
+ * Write log
+ * @param data -> string to write 
+ */
+function writeLog(data) {
+
+    const todayTime = new Date();
+    const month = todayTime.getMonth() + 1;
+    const day = todayTime.getDate();
+    const year = todayTime.getFullYear();
+
+    const fileName = "logs/log_" + month + "_" + day + "_" + year + ".log";
+
+    if (!fs.existsSync("logs")) {
+        fs.mkdirSync("logs");
+    }
+
+    fs.appendFile(fileName, data + "\n", function () { })
+
+}
+
+/**
+ * Write log error
+ * @param err -> Error object
+ */
 function writeLogErrorFile(err) {
 
     var todayTime = new Date();
     var month = todayTime.getMonth();
     var day = todayTime.getDate();
     var year = todayTime.getFullYear();
-    var hour = todayTime.getHours();
-    var min = todayTime.getMinutes();
-    const error = month + "/" + day + "/" + year + "-" + hour + ":" + min + "\n" + err.stack + "\n\n";
+
+    const error = month + "/" + day + "/" + year + "-" + getTime() + "\n" + err.stack + "\n\n";
 
     if (!fs.existsSync("logs")){
         fs.mkdirSync("logs");
@@ -408,6 +487,9 @@ function writeLogErrorFile(err) {
     fs.appendFile("logs/logsErrors.log", error, function () { })
 }
 
+/**
+ * Control if device is online
+*/
 function checkIsOnline() {
     return new Promise((resolve, reject) => {
         dns.resolve('www.google.com', function (err) {
@@ -426,6 +508,11 @@ function checkIsOnline() {
     })
 }
 
+/**
+ * Control if ip address is valid
+ * @param ipAddress -> ip address -> "192.168.1.1"
+ * @returns boolean true/false 
+ */
 function validateIpAddress(ipAddress) {
     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipAddress)) {
         return (true)
@@ -433,6 +520,11 @@ function validateIpAddress(ipAddress) {
     return (false)
 }
 
+/**
+ * Control if port range is valid
+ * @param range -> range ports -> 0-655
+ * @returns boolean true/false 
+ */
 function validateRange(range)    {
     
     let startRange = range.substring(0, range.indexOf("-"));
@@ -455,6 +547,11 @@ function validateRange(range)    {
     }
 }
 
+/**
+ * Control if status ports is valid
+ * @param {*} status -> String of status -> "Open", "Refused"...
+ * @returns boolean true/false
+ */
 function validateStatus(status) {
     
     if (status.toUpperCase().indexOf("OPEN") != -1 || status.toUpperCase().indexOf("TIMEOUT") != -1 || status.toUpperCase().indexOf("REFUSED") != -1 || status.toUpperCase().indexOf("UNREACHABLE") != -1) {
@@ -463,7 +560,6 @@ function validateStatus(status) {
         return false;
     }
 }
-
 
 module.exports = {
     selectMode: selectMode,

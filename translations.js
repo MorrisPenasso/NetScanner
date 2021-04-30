@@ -57,7 +57,7 @@ if(x === "it")  {
         ,
         {
             name: "scanningMsg",
-            msg: "Scansione..."
+            msg: "Scansione degli indirizzi ip attivi..."
 
         },
         {
@@ -77,7 +77,7 @@ if(x === "it")  {
         },
         {
             name: "loadingMsg",
-            msg: "Caricamento..."
+            msg: "Caricamento delle informazioni di rete locali..."
 
         },
         {
@@ -139,6 +139,11 @@ if(x === "it")  {
             name: "statusMsg",
             msg: "Stato: "  
 
+        },
+        {
+            name: "time",
+            msg: "Orario: "  
+
         }   
            
     )
@@ -195,7 +200,7 @@ if(x === "it")  {
         ,
         {
             name: "scanningMsg",
-            msg: "Scanning..."
+            msg: "Scanning of active ip addresses..."
 
         },
         {
@@ -215,7 +220,7 @@ if(x === "it")  {
         },
         {
             name: "loadingMsg",
-            msg: "Loading..."
+            msg: "Loading local informations..."
 
         },
         {
@@ -277,7 +282,12 @@ if(x === "it")  {
             name: "statusMsg",
             msg: "Status: "  
 
-        }         
+        },
+        {
+            name: "time",
+            msg: "Time: "  
+
+        }          
     )
 }
 
