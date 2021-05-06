@@ -1,7 +1,8 @@
 const asciify = require("asciify-image"); // library to create asciify images
 const coreFunctions = require("./core");
 const translations = require("./translations");
-const chalkAnimation = require('chalk-animation'); // library to create animations
+const signale = require("signale");
+
 const readline = require('readline');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
@@ -9,10 +10,9 @@ process.stdin.setRawMode(true);
 var isStarted = false; // for not duplicate enter keypress event
 
 //Print message for packages
-const msgRainbow2 = chalkAnimation.rainbow(translations.getPhrase("packageInstalled")); // Animation starts
+signale.success(translations.getPhrase("packageInstalled"));
 setTimeout(() => {
     showLogo();
-    msgRainbow2.stop();
 }, 2000)
 
 /**
@@ -32,7 +32,7 @@ function showLogo() {
 
         //Print welcome message
         var msg = translations.getPhrase("WelcomeMessageWithLogo");
-        const msgRainbow1 = chalkAnimation.rainbow(msg); // Animation starts
+        signale.success(msg);
 
         //When press a button
         process.stdin.on('keypress', function (key, data) {
@@ -40,7 +40,6 @@ function showLogo() {
 
                 if (!isStarted) {
                     coreFunctions.selectMode();
-                    msgRainbow1.stop();
                     isStarted = true;
                 }
                 
