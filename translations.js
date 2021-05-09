@@ -20,7 +20,7 @@ if (lang === "it") {
         },
         {
             name: "WelcomeMessageWithLogo",
-            msg: "Benvenuto in NetScanner! Versione: " + pjson.version + "\nPremi Invio per iniziare"
+            msg: "Benvenuto in NetScanner! Versione: " + pjson.version + "\n Premi Invio per iniziare"
 
         },
 
@@ -58,12 +58,21 @@ if (lang === "it") {
             name: "gatewayPnlCtrl",
             msg: "Apri il pannello di controllo del router"
 
+        },
+        {
+            name: "getWifiList",
+            msg: "Informazioni sulle reti Wifi visibili"
         }
         //END COMMANDS
         ,
         {
             name: "scanningMsg",
             msg: "Scansione degli indirizzi ip attivi..."
+
+        },
+        {
+            name: "scanningWifi",
+            msg: "Scansione delle reti wifi visibili..."
 
         },
         {
@@ -150,8 +159,53 @@ if (lang === "it") {
             name: "time",
             msg: "Orario: "  
 
-        }   
-           
+        },
+        //WIFI MODE
+        {
+            name: "ssid",
+            msg: "Nome Wifi: "  
+
+        },
+        {
+            name: "mac",
+            msg: "Mac Address: "  
+
+        },
+        {
+            name: "channel",
+            msg: "Canale: "  
+
+        },
+        {
+            name: "frequency",
+            msg: "Frequenza: "  
+
+        },
+        {
+            name: "signaleLevel",
+            msg: "Livello segnale: "  
+
+        },
+        {
+            name: "quality",
+            msg: "Qualità segnale: "  
+
+        },
+        {
+            name: "security",
+            msg: "Livello sicurezza: "  
+
+        },
+        {
+            name: "securityProtocol",
+            msg: "Protocollo di crittografia: "  
+
+        },
+        {
+            name: "networkMode",
+            msg: "Tipo di connessione: "  
+
+        }         
     )
 } else if(lang === "en")   {
 
@@ -201,12 +255,21 @@ if (lang === "it") {
             name: "gatewayPnlCtrl",
             msg: "Open Gateway Panel Control"
 
-        }
+        },
+        {
+            name: "getWifiList",
+            msg: "Informations on visible wifi networks"
+        } 
         //END COMMANDS
         ,
         {
             name: "scanningMsg",
             msg: "Scanning of active ip addresses..."
+
+        },
+        {
+            name: "scanningWifi",
+            msg: "Scanning of visible wifi networks..."
 
         },
         {
@@ -293,7 +356,52 @@ if (lang === "it") {
             name: "time",
             msg: "Time: "  
 
-        }          
+        },  //WIFI MODE
+        {
+            name: "ssid",
+            msg: "ssid: "  
+
+        },
+        {
+            name: "mac",
+            msg: "Mac Address: "  
+
+        },
+        {
+            name: "channel",
+            msg: "Channel: "  
+
+        },
+        {
+            name: "frequency",
+            msg: "Frequency: "  
+
+        },
+        {
+            name: "signaleLevel",
+            msg: "Signale level: "  
+
+        },
+        {
+            name: "quality",
+            msg: "Signale quality: "  
+
+        },
+        {
+            name: "security",
+            msg: "Security level: "  
+
+        },
+        {
+            name: "securityProtocol",
+            msg: "Cryptography protocol: "  
+
+        },
+        {
+            name: "networkMode",
+            msg: "Network mode: "  
+
+        }           
     )
 }
 

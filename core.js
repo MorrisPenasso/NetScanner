@@ -6,7 +6,12 @@ const network = require('network');
 const open = require('open');
 const fs = require("fs");
 const dns = require('dns');
+const wifi = require('node-wifi');
 const translations = require("./translations");
+
+wifi.init({
+    iface: null // network interface, choose a random wifi interface if set to null
+});
 
 /**
  * Select mode : scanListIp - scanPort
@@ -39,6 +44,10 @@ function selectMode() {
                 {
                     name: translations.getPhrase("gatewayPnlCtrl"),
                     value: "gatewayPnlCtrl"
+                },
+                {
+                    name: translations.getPhrase("getWifiList"),
+                    value: "wifiList"
                 }
             ]
         }
@@ -66,6 +75,9 @@ function selectMode() {
             } else if (answer.mode == "gatewayPnlCtrl") {
 
                 openGatewayPanelControl(); // with error controller
+            } else if (answer.mode == "wifiList") {
+
+                getWifiInformations(); // with error controller
             }
         }
 
@@ -431,6 +443,68 @@ function openGatewayPanelControl() {
     })
 }
 
+async function getWifiInformations() {
+
+    writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
+
+    writeLog("\n" + translations.getPhrase("scanningWifi"));
+
+    signale.pending(translations.getPhrase("scanningWifi"));
+
+    const networks = await getWifiList();
+
+    if (networks) {
+
+        for (let i = 0; i < networks.length; i++) {
+
+            const singleWifi = networks[i];
+
+            if (singleWifi && singleWifi.ssid) {
+                signale.info(translations.getPhrase("ssid") + singleWifi.ssid);
+                signale.info(translations.getPhrase("mac") + singleWifi.mac);
+                signale.info(translations.getPhrase("channel") + singleWifi.channel);
+                signale.info(translations.getPhrase("frequency") + singleWifi.frequency);
+                signale.info(translations.getPhrase("signaleLevel") + singleWifi.signal_level);
+                signale.info(translations.getPhrase("quality") + singleWifi.quality);
+                signale.info(translations.getPhrase("security") + singleWifi.security);
+                signale.info(translations.getPhrase("securityProtocol") + singleWifi.security_flags);
+                signale.info(translations.getPhrase("networkMode") + singleWifi.mode);
+                console.log("--------------------");
+                await writeLog(translations.getPhrase("ssid") + singleWifi.ssid);
+                await writeLog(translations.getPhrase("mac") + singleWifi.mac);
+                await writeLog(translations.getPhrase("channel") + singleWifi.channel);
+                await writeLog(translations.getPhrase("frequency") + singleWifi.frequency);
+                await writeLog(translations.getPhrase("signaleLevel") + singleWifi.signal_level);
+                await writeLog(translations.getPhrase("quality") + singleWifi.quality);
+                await writeLog(translations.getPhrase("security") + singleWifi.security);
+                await writeLog(translations.getPhrase("securityProtocol") + singleWifi.security_flags);
+                await writeLog(translations.getPhrase("networkMode") + singleWifi.mode);
+                await writeLog("--------------------");
+
+            }
+        }
+        writeLog(translations.getPhrase("finishMsg") + "\n")
+        signale.success(translations.getPhrase("finishMsg"));
+        selectMode();
+    }
+}
+
+function getWifiList() {
+    return new Promise((resolve, reject) => {
+
+        // Scan networks
+        wifi.scan((error, networks) => {
+            if (error) {
+                signale.error(translations.getPhrase("errorMsg"));
+                writeLogErrorFile(error);
+                resolve(null);
+            } else {
+                resolve(networks);
+            }
+        })
+    })
+}
+
 /**
  * Get time
  * @returns time -> "12:30" 
@@ -448,23 +522,25 @@ function getTime()  {
 
 /**
  * Write log
- * @param data -> string to write 
+ * @param data -> string to write
  */
 function writeLog(data) {
+    return new Promise((resolve, reject) => {
 
-    const todayTime = new Date();
-    const month = todayTime.getMonth() + 1;
-    const day = todayTime.getDate();
-    const year = todayTime.getFullYear();
+        const todayTime = new Date();
+        const month = todayTime.getMonth() + 1;
+        const day = todayTime.getDate();
+        const year = todayTime.getFullYear();
 
-    const fileName = "logs/log_" + month + "_" + day + "_" + year + ".log";
+        const fileName = "logs/log_" + month + "_" + day + "_" + year + ".log";
 
-    if (!fs.existsSync("logs")) {
-        fs.mkdirSync("logs");
-    }
+        if (!fs.existsSync("logs")) {
+            fs.mkdirSync("logs");
+        }
 
-    fs.appendFile(fileName, data + "\n", function () { })
-
+        fs.appendFile(fileName, data + "\n", function () { })
+        resolve();
+    })
 }
 
 /**
