@@ -217,7 +217,7 @@ if (lang === "it") {
         },
         {
             name: "WelcomeMessageWithLogo",
-            msg: "Welcome in NetScanner! Version: " + pjson.version + "Press Enter to start"
+            msg: "Welcome in NetScanner! Version: " + pjson.version + "\n Press Enter to start"
 
         },
 
