@@ -1,5 +1,5 @@
 # NetScanner
-A Nodejs app for scan you network!
+A Nodejs app for scan your network!
 
 For use this software, please install:
 
