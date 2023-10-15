@@ -19,8 +19,8 @@ if (lang === "it") {
 
         },
         {
-            name: "WelcomeMessageWithLogo",
-            msg: "Benvenuto in NetScanner! Versione: " + pjson.version + "\n Premi Invio per iniziare"
+            name: "WelcomeMessageOnStart",
+            msg: "Benvenuto in NetScanner! Versione: " + pjson.version + "\n"
 
         },
 
@@ -88,6 +88,11 @@ if (lang === "it") {
         {
             name: "errorMsg",
             msg: "Errore: Guarda il file di log"
+
+        },
+        {
+            name: "errorOnline",
+            msg: "Errore: Non sei online"
 
         },
         {
@@ -216,8 +221,8 @@ if (lang === "it") {
 
         },
         {
-            name: "WelcomeMessageWithLogo",
-            msg: "Welcome in NetScanner! Version: " + pjson.version + "\n Press Enter to start"
+            name: "WelcomeMessageOnStart",
+            msg: "Welcome in NetScanner! Version: " + pjson.version + "\n"
 
         },
 
@@ -285,6 +290,11 @@ if (lang === "it") {
         {
             name: "errorMsg",
             msg: "Error: see log file"
+
+        },
+        {
+            name: "errorOnline",
+            msg: "Error: You are offline"
 
         },
         {

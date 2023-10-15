@@ -1,3 +1,4 @@
+
 const inquirer = require("inquirer");
 const signale = require("signale");
 const evilScan = require("evilscan");
@@ -79,6 +80,10 @@ function selectMode() {
 
                 getWifiInformations(); // with error controller
             }
+        } else {
+            signale.error(translations.getPhrase("errorOnline"));
+            writeLogErrorFile(translations.getPhrase("errorOnline"));
+            return;
         }
 
     })
@@ -105,9 +110,21 @@ function scanListIp() {
             //if ip address is alive
             if (res.alive) {
 
-                signale.info(res.host);
-                writeLog(res.host);
+                dns.reverse(res.host, (err, hostname) => {
+                    
+                    let finalHostname = "";
+                    if(hostname && hostname !== "") {
 
+                        finalHostname = res.host + " - " + hostname;
+                    } else  {
+
+                        finalHostname = res.host;
+                    }
+
+                    signale.info(finalHostname);
+                    writeLog(finalHostname);
+
+                });
             }
 
             //when finish to ping all ip address
@@ -146,52 +163,59 @@ function sshCommand() {
 
             var Client = require('ssh2').Client;
 
-            var conn = new Client();
-            conn.on('ready', function () {
+            try {
 
-                signale.success('Connection established...\n');
-                writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
-                writeLog('SSH connection established...\n');
+                var conn = new Client();
+                conn.on('ready', function () {
 
-                conn.shell(function (err, stream) {
+                    signale.success('Connection established...\n');
+                    writeLog(translations.getPhrase("time") + " " + getTime() + "\n");
+                    writeLog('SSH connection established...\n');
 
-                    //If receive error when start connection
-                    if (err) {
-                        signale.error(translations.getPhrase("errorMsg"));
-                        writeLogErrorFile(err);
-                        return;
-                    }
+                    conn.shell(function (err, stream) {
 
-                    //when stream is closed
-                    stream.on('close', function () {
-                        signale.info('Connection closed\n');
-                        writeLog("Connection closed\n")
-                        conn.end();
+                        //If receive error when start connection
+                        if (err) {
+                            signale.error(translations.getPhrase("errorMsg"));
+                            writeLogErrorFile(err);
+                            return;
+                        }
 
-                        //when stream receive data
-                    }).on('data', function (data) {
-                        console.log("" + data);
-                        writeLog("" + data)
-                    });
+                        //when stream is closed
+                        stream.on('close', function () {
+                            signale.info('Connection closed\n');
+                            writeLog("Connection closed\n")
+                            conn.end();
 
-                    //when is connected, i wait 2 seconds because the client return the response for connection complete
-                    setTimeout(function () {
-                        askCommand(function (command) {
-                            stream.end(command + "\nexit\n");
+                            //when stream receive data
+                        }).on('data', function (data) {
+                            console.log("" + data);
+                            writeLog("" + data)
+                        });
 
-                            setTimeout(function () {
-                                selectMode();
-                            }, 500)
-                        })
-                    }, 2000)
-                })
-            }).connect({
-                host: info[0],
-                port: 22,
-                username: info[1],
-                password: info[2]
-            });
-        } else  {
+                        //when is connected, i wait 2 seconds because the client return the response for connection complete
+                        setTimeout(function () {
+                            askCommand(function (command) {
+                                stream.end(command + "\nexit\n");
+
+                                setTimeout(function () {
+                                    selectMode();
+                                }, 500)
+                            })
+                        }, 2000)
+                    })
+                }).connect({
+                    host: info[0],
+                    port: 22,
+                    username: info[1],
+                    password: info[2]
+                });
+            } catch (error) {
+                signale.error(translations.getPhrase("errorMsg"));
+                writeLogErrorFile(err);
+                return;
+            }
+        } else {
             signale.error(translations.getPhrase("errorMsg"));
             writeLogErrorFile({ stack: "SSH Error: You have entered invalid informations" });
             error = true;
@@ -334,7 +358,7 @@ function askForScanPorts() {
         if(!error)    {
             // scan
             await scan(answers.target, answers.range, answers.status, null);
-            signale.pending(translations.getPhrase("loadingMsg"));
+            signale.pending(translations.getPhrase("scanPort"));
         }
     })
 }
@@ -468,7 +492,7 @@ async function getWifiInformations() {
                 signale.info(translations.getPhrase("quality") + singleWifi.quality);
                 signale.info(translations.getPhrase("security") + singleWifi.security);
                 signale.info(translations.getPhrase("securityProtocol") + singleWifi.security_flags);
-                signale.info(translations.getPhrase("networkMode") + singleWifi.mode);
+                signale.info(translations.getPhrase("networkMode") + (singleWifi.mode ? singleWifi.mode : " "));
                 console.log("--------------------");
                 await writeLog(translations.getPhrase("ssid") + singleWifi.ssid);
                 await writeLog(translations.getPhrase("mac") + singleWifi.mac);
@@ -478,7 +502,7 @@ async function getWifiInformations() {
                 await writeLog(translations.getPhrase("quality") + singleWifi.quality);
                 await writeLog(translations.getPhrase("security") + singleWifi.security);
                 await writeLog(translations.getPhrase("securityProtocol") + singleWifi.security_flags);
-                await writeLog(translations.getPhrase("networkMode") + singleWifi.mode);
+                await writeLog(translations.getPhrase("networkMode") + (singleWifi.mode ? singleWifi.mode : " "));
                 await writeLog("--------------------");
 
             }

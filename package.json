@@ -1,6 +1,6 @@
 {
   "name": "netscanner",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Network Scanner",
   "main": "app.js",
   "scripts": {
@@ -18,14 +18,16 @@
   },
   "homepage": "https://github.com/MorrisPenasso/NetScanner#readme",
   "dependencies": {
-    "asciify-image": "^0.1.6",
-    "evilscan": "^1.7.9",
+    "evilscan": "^1.9.1",
     "inquirer": "^7.3.3",
-    "network": "^0.5.0",
-    "node-wifi": "^2.0.14",
+    "network": "^0.6.1",
+    "node-wifi": "^2.0.16",
     "open": "^8.0.4",
-    "ping": "^0.4.0",
+    "ping": "^0.4.4",
     "signale": "^1.4.0",
-    "ssh2": "^0.8.9"
+    "ssh2": "^1.14.0"
+  },
+  "overrides": {
+    "xml2js": "^0.5.0"
   }
 }
