@@ -1,6 +1,6 @@
-const pjson = require('./package.json');
+const pjson: any = require('../package.json');
 
-var lang = "";
+let lang: string = "";
 
 if (process.env.LANG) {
     lang = process.env.LANG.substring(0, process.env.LANG.indexOf("_")); // get local language
@@ -8,7 +8,7 @@ if (process.env.LANG) {
     lang = "en";
 }
 
-var listPhrases = [];
+let listPhrases: ITranslationPhrase [] = [];
 
 if (lang === "it") {
 
@@ -420,11 +420,11 @@ if (lang === "it") {
  * @param name -> Name/cmd of phrase
  * @returns phrase stringtran
  */
-function getPhrase(name)    {
+function getPhrase(name): string    {
 
-    var phraseFound = null;
+    let phraseFound: ITranslationPhrase;
 
-    listPhrases.forEach(function(phraseObj)  {
+    listPhrases.forEach(function(phraseObj: ITranslationPhrase)  {
 
         if(phraseObj.name === name) {
             phraseFound = phraseObj;

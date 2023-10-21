@@ -1,8 +1,8 @@
-const coreFunctions = require("./core");
-const translations = require("./translations");
-const signale = require("signale");
+const coreFunctions: any = require("./core");
+const translations: any = require("./translations");
+const signale: any = require("signale");
+const readline: any = require('readline');
 
-const readline = require('readline');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
@@ -13,17 +13,15 @@ setTimeout(() => {
 }, 2000)
 
 /**
- * Start application
+ * Starts the program.
  */
-async function start() {
+function start(): void {
 
-    //Print welcome message
+    // Print welcome message
     var msg = translations.getPhrase("WelcomeMessageOnStart");
-   
+    
     signale.success(msg);
 
+    // Select mode
     coreFunctions.selectMode();
-
 }
-
-
